@@ -1434,6 +1434,7 @@ def forecast_arima(model, h=None, level=None, fan=False,
                 pred.reshape(-1, 1) - quantiles * se.reshape(-1, 1),
                 columns=[f'{l}%' for l in level],
             )
+            lower = lower.iloc[:, ::-1]
             upper = pd.DataFrame(
                 pred.reshape(-1, 1) + quantiles * se.reshape(-1, 1),
                 columns=[f'{l}%' for l in level],
@@ -2423,7 +2424,7 @@ class AutoARIMA:
             lo = forecast['lower'].add_prefix('lo_')
             hi = forecast['upper'].add_prefix('hi_')
 
-            return pd.concat([lo, mean, hi], 1)
+            return pd.concat(objs=[lo, mean, hi], axis=1)
 
         return mean
 
@@ -2451,14 +2452,15 @@ class AutoARIMA:
 
             lo = pd.DataFrame(
                 fitted_values.values.reshape(-1, 1) - quantiles * se.reshape(-1, 1),
-                columns=[f'lo_{l}%' for l in reversed(_level)],
+                columns=[f'lo_{l}%' for l in _level],
             )
+            lo = lo.iloc[:, ::-1]
             hi = pd.DataFrame(
                 fitted_values.values.reshape(-1, 1) + quantiles * se.reshape(-1, 1),
                 columns=[f'hi_{l}%' for l in _level],
             )
 
-            return pd.concat([lo, fitted_values, hi], axis=1)
+            return pd.concat(objs=[lo, fitted_values, hi], axis=1)
 
         return fitted_values
 
